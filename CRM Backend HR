@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusinessCRM - Backend Implementation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #e63946;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+        
+        h3 {
+            color: var(--secondary);
+            margin: 15px 0;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary);
+        }
+        
+        code {
+            background: #f8f9fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .file-structure {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        
+        .directory {
+            color: #6ab0f3;
+        }
+        
+        .file {
+            color: #e6db74;
+        }
+        
+        .sql-keyword {
+            color: #f92672;
+        }
+        
+        .sql-table {
+            color: #a6e22e;
+        }
+        
+        .sql-column {
+            color: #fd971f;
+        }
+        
+        .note {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid var(--info);
+        }
+        
+        .php-tag {
+            color: #f92672;
+        }
+        
+        .php-echo {
+            color: #e6db74;
+        }
+        
+        .php-function {
+            color: #66d9ef;
+        }
+        
+        .php-variable {
+            color: #fd971f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BusinessCRM - Backend Implementation</h1>
+            <p>Complete PHP and MySQL backend for the CRM system with HR features</p>
+        </header>
+        
+        <div class="content">
+            <div class="section">
+                <h2>Database Schema</h2>
+                
+                <h3>Users Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">users</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">name</span> <span class="sql-keyword">VARCHAR</span>(100) <span class="sql-keyword">NOT NULL</span>,
+    <span class="sql-column">email</span> <span class="sql-keyword">VARCHAR</span>(100) <span class="sql-keyword">UNIQUE NOT NULL</span>,
+    <span class="sql-column">password</span> <span class="sql-keyword">VARCHAR</span>(255) <span class="sql-keyword">NOT NULL</span>,
+    <span class="sql-column">role</span> <span class="sql-keyword">ENUM</span>('admin', 'hr', 'employee') <span class="sql-keyword">DEFAULT</span> 'employee',
+    <span class="sql-column">department</span> <span class="sql-keyword">VARCHAR</span>(50),
+    <span class="sql-column">position</span> <span class="sql-keyword">VARCHAR</span>(50),
+    <span class="sql-column">created_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-column">updated_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</span>
+);</code></pre>
+
+                <h3>Leave Requests Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">leave_requests</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">user_id</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">leave_type</span> <span class="sql-keyword">ENUM</span>('vacation', 'sick', 'personal', 'maternity', 'paternity') <span class="sql-keyword">NOT NULL</span>,
+    <span class="sql-column">start_date</span> <span class="sql-keyword">DATE NOT NULL</span>,
+    <span class="sql-column">end_date</span> <span class="sql-keyword">DATE NOT NULL</span>,
+    <span class="sql-column">reason</span> <span class="sql-keyword">TEXT</span>,
+    <span class="sql-column">status</span> <span class="sql-keyword">ENUM</span>('pending', 'approved', 'rejected') <span class="sql-keyword">DEFAULT</span> 'pending',
+    <span class="sql-column">approved_by</span> <span class="sql-keyword">INT</span>,
+    <span class="sql-column">created_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-column">updated_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (user_id) <span class="sql-keyword">REFERENCES</span> users(id),
+    <span class="sql-keyword">FOREIGN KEY</span> (approved_by) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+
+                <h3>Attendance Records Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">attendance</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">user_id</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">date</span> <span class="sql-keyword">DATE NOT NULL</span>,
+    <span class="sql-column">clock_in</span> <span class="sql-keyword">TIME</span>,
+    <span class="sql-column">clock_out</span> <span class="sql-keyword">TIME</span>,
+    <span class="sql-column">hours_worked</span> <span class="sql-keyword">DECIMAL</span>(4,2),
+    <span class="sql-column">status</span> <span class="sql-keyword">ENUM</span>('present', 'absent', 'late', 'half-day') <span class="sql-keyword">DEFAULT</span> 'present',
+    <span class="sql-column">notes</span> <span class="sql-keyword">TEXT</span>,
+    <span class="sql-keyword">UNIQUE KEY</span> unique_attendance (user_id, date),
+    <span class="sql-keyword">FOREIGN KEY</span> (user_id) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+
+                <h3>Calendar Events Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">calendar_events</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">title</span> <span class="sql-keyword">VARCHAR</span>(255) <span class="sql-keyword">NOT NULL</span>,
+    <span class="sql-column">description</span> <span class="sql-keyword">TEXT</span>,
+    <span class="sql-column">start_date</span> <span class="sql-keyword">DATETIME NOT NULL</span>,
+    <span class="sql-column">end_date</span> <span class="sql-keyword">DATETIME</span>,
+    <span class="sql-column">event_type</span> <span class="sql-keyword">ENUM</span>('meeting', 'holiday', 'event', 'reminder') <span class="sql-keyword">DEFAULT</span> 'event',
+    <span class="sql-column">created_by</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">created_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (created_by) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+
+                <h3>Chat Messages Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">chat_messages</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">sender_id</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">receiver_id</span> <span class="sql-keyword">INT</span>,
+    <span class="sql-column">group_id</span> <span class="sql-keyword">INT</span>,
+    <span class="sql-column">message</span> <span class="sql-keyword">TEXT NOT NULL</span>,
+    <span class="sql-column">is_read</span> <span class="sql-keyword">TINYINT</span>(1) <span class="sql-keyword">DEFAULT</span> 0,
+    <span class="sql-column">created_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (sender_id) <span class="sql-keyword">REFERENCES</span> users(id),
+    <span class="sql-keyword">FOREIGN KEY</span> (receiver_id) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+
+                <h3>Meetings Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">meetings</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">title</span> <span class="sql-keyword">VARCHAR</span>(255) <span class="sql-keyword">NOT NULL</span>,
+    <span class="sql-column">description</span> <span class="sql-keyword">TEXT</span>,
+    <span class="sql-column">start_time</span> <span class="sql-keyword">DATETIME NOT NULL</span>,
+    <span class="sql-column">end_time</span> <span class="sql-keyword">DATETIME</span>,
+    <span class="sql-column">meeting_url</span> <span class="sql-keyword">VARCHAR</span>(255),
+    <span class="sql-column">meeting_id</span> <span class="sql-keyword">VARCHAR</span>(100),
+    <span class="sql-column">password</span> <span class="sql-keyword">VARCHAR</span>(100),
+    <span class="sql-column">created_by</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">created_at</span> <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (created_by) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+
+                <h3>Meeting Participants Table</h3>
+                <pre><code><span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">meeting_participants</span> (
+    <span class="sql-column">id</span> <span class="sql-keyword">INT</span> <span class="sql-keyword">AUTO_INCREMENT PRIMARY KEY</span>,
+    <span class="sql-column">meeting_id</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">user_id</span> <span class="sql-keyword">INT NOT NULL</span>,
+    <span class="sql-column">status</span> <span class="sql-keyword">ENUM</span>('invited', 'accepted', 'declined') <span class="sql-keyword">DEFAULT</span> 'invited',
+    <span class="sql-keyword">UNIQUE KEY</span> unique_participation (meeting_id, user_id),
+    <span class="sql-keyword">FOREIGN KEY</span> (meeting_id) <span class="sql-keyword">REFERENCES</span> meetings(id),
+    <span class="sql-keyword">FOREIGN KEY</span> (user_id) <span class="sql-keyword">REFERENCES</span> users(id)
+);</code></pre>
+            </div>
+
+            <div class="section">
+                <h2>PHP File Structure</h2>
+                
+                <div class="file-structure">
+                    <div class="directory">/crm-system/</div>
+                    <div class="file">index.php</div>
+                    <div class="file">login.php</div>
+                    <div class="file">logout.php</div>
+                    <div class="directory">/config/</div>
+                    <div class="file">database.php</div>
+                    <div class="file">config.php</div>
+                    <div class="directory">/includes/</div>
+                    <div class="file">auth.php</div>
+                    <div class="file">functions.php</div>
+                    <div class="directory">/api/</div>
+                    <div class="file">users.php</div>
+                    <div class="file">leave.php</div>
+                    <div class="file">attendance.php</div>
+                    <div class="file">calendar.php</div>
+                    <div class="file">chat.php</div>
+                    <div class="file">meetings.php</div>
+                    <div class="directory">/models/</div>
+                    <div class="file">User.php</div>
+                    <div class="file">LeaveRequest.php</div>
+                    <div class="file">Attendance.php</div>
+                    <div class="file">CalendarEvent.php</div>
+                    <div class="file">ChatMessage.php</div>
+                    <div class="file">Meeting.php</div>
+                    <div class="directory">/templates/</div>
+                    <div class="file">header.php</div>
+                    <div class="file">footer.php</div>
+                    <div class="file">sidebar.php</div>
+                    <div class="directory">/assets/</div>
+                    <div class="directory">/css/</div>
+                    <div class="directory">/js/</div>
+                    <div class="directory">/uploads/</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Key PHP Files Implementation</h2>
+                
+                <h3>config/database.php</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">define</span>(<span class="php-echo">'DB_HOST'</span>, <span class="php-echo">'localhost'</span>);
+<span class="php-function">define</span>(<span class="php-echo">'DB_NAME'</span>, <span class="php-echo">'crm_system'</span>);
+<span class="php-function">define</span>(<span class="php-echo">'DB_USER'</span>, <span class="php-echo">'root'</span>);
+<span class="php-function">define</span>(<span class="php-echo">'DB_PASS'</span>, <span class="php-echo">''</span>);
+
+<span class="php-keyword">class</span> <span class="php-class">Database</span> {
+    <span class="php-keyword">private</span> <span class="php-variable">$host</span> = DB_HOST;
+    <span class="php-keyword">private</span> <span class="php-variable">$dbname</span> = DB_NAME;
+    <span class="php-keyword">private</span> <span class="php-variable">$user</span> = DB_USER;
+    <span class="php-keyword">private</span> <span class="php-variable">$pass</span> = DB_PASS;
+    <span class="php-keyword">private</span> <span class="php-variable">$conn</span>;
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">connect</span>() {
+        <span class="php-variable">$this</span>-&gt;conn = <span class="php-keyword">null</span>;
+
+        <span class="php-keyword">try</span> {
+            <span class="php-variable">$this</span>-&gt;conn = <span class="php-keyword">new</span> PDO(<span class="php-echo">'mysql:host='</span> . <span class="php-variable">$this</span>-&gt;host . <span class="php-echo">';dbname='</span> . <span class="php-variable">$this</span>-&gt;dbname, 
+            <span class="php-variable">$this</span>-&gt;user, <span class="php-variable">$this</span>-&gt;pass);
+            <span class="php-variable">$this</span>-&gt;conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } <span class="php-keyword">catch</span>(PDOException <span class="php-variable">$e</span>) {
+            <span class="php-keyword">echo</span> <span class="php-echo">'Connection Error: '</span> . <span class="php-variable">$e</span>-&gt;getMessage();
+        }
+
+        <span class="php-keyword">return</span> <span class="php-variable">$this</span>-&gt;conn;
+    }
+}
+<span class="php-tag">?&gt;</span></code></pre>
+
+                <h3>includes/auth.php</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">session_start</span>();
+
+<span class="php-function">require_once</span> <span class="php-echo">'../config/database.php'</span>;
+
+<span class="php-keyword">class</span> <span class="php-class">Auth</span> {
+    <span class="php-keyword">private</span> <span class="php-variable">$db</span>;
+    <span class="php-keyword">private</span> <span class="php-variable">$conn</span>;
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">__construct</span>() {
+        <span class="php-variable">$this</span>-&gt;db = <span class="php-keyword">new</span> Database();
+        <span class="php-variable">$this</span>-&gt;conn = <span class="php-variable">$this</span>-&gt;db-&gt;connect();
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">login</span>(<span class="php-variable">$email</span>, <span class="php-variable">$password</span>) {
+        <span class="php-variable">$query</span> = <span class="php-echo">"SELECT * FROM users WHERE email = :email"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':email'</span>, <span class="php-variable">$email</span>);
+        <span class="php-variable">$stmt</span>-&gt;execute();
+
+        <span class="php-keyword">if</span>(<span class="php-variable">$stmt</span>-&gt;rowCount() == <span class="php-number">1</span>) {
+            <span class="php-variable">$user</span> = <span class="php-variable">$stmt</span>-&gt;fetch(PDO::FETCH_ASSOC);
+            <span class="php-variable">$hashed_password</span> = <span class="php-variable">$user</span>[<span class="php-echo">'password'</span>];
+
+            <span class="php-keyword">if</span>(<span class="php-function">password_verify</span>(<span class="php-variable">$password</span>, <span class="php-variable">$hashed_password</span>)) {
+                <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_id'</span>] = <span class="php-variable">$user</span>[<span class="php-echo">'id'</span>];
+                <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_email'</span>] = <span class="php-variable">$user</span>[<span class="php-echo">'email'</span>];
+                <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_name'</span>] = <span class="php-variable">$user</span>[<span class="php-echo">'name'</span>];
+                <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_role'</span>] = <span class="php-variable">$user</span>[<span class="php-echo">'role'</span>];
+                <span class="php-keyword">return</span> <span class="php-keyword">true</span>;
+            }
+        }
+        <span class="php-keyword">return</span> <span class="php-keyword">false</span>;
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">isLoggedIn</span>() {
+        <span class="php-keyword">return</span> <span class="php-function">isset</span>(<span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_id'</span>]);
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">logout</span>() {
+        <span class="php-variable">$_SESSION</span> = <span class="php-keyword">array</span>();
+        <span class="php-function">session_destroy</span>();
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">hasRole</span>(<span class="php-variable">$role</span>) {
+        <span class="php-keyword">return</span> <span class="php-function">isset</span>(<span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_role'</span>]) && <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_role'</span>] === <span class="php-variable">$role</span>;
+    }
+}
+<span class="php-tag">?&gt;</span></code></pre>
+
+                <h3>api/leave.php</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">require_once</span> <span class="php-echo">'../includes/auth.php'</span>;
+<span class="php-function">require_once</span> <span class="php-echo">'../models/LeaveRequest.php'</span>;
+
+<span class="php-variable">$auth</span> = <span class="php-keyword">new</span> Auth();
+<span class="php-keyword">if</span>(!<span class="php-variable">$auth</span>-&gt;isLoggedIn()) {
+    <span class="php-function">http_response_code</span>(<span class="php-number">401</span>);
+    <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'error'</span> => <span class="php-echo">'Unauthorized'</span>]);
+    <span class="php-keyword">exit</span>;
+}
+
+<span class="php-variable">$leaveRequest</span> = <span class="php-keyword">new</span> LeaveRequest();
+
+<span class="php-variable">$method</span> = <span class="php-variable">$_SERVER</span>[<span class="php-echo">'REQUEST_METHOD'</span>];
+
+<span class="php-keyword">switch</span>(<span class="php-variable">$method</span>) {
+    <span class="php-keyword">case</span> <span class="php-echo">'GET'</span>:
+        <span class="php-keyword">if</span>(<span class="php-function">isset</span>(<span class="php-variable">$_GET</span>[<span class="php-echo">'id'</span>])) {
+            <span class="php-variable">$result</span> = <span class="php-variable">$leaveRequest</span>-&gt;getLeaveRequest(<span class="php-variable">$_GET</span>[<span class="php-echo">'id'</span>]);
+        } <span class="php-keyword">else</span> {
+            <span class="php-variable">$result</span> = <span class="php-variable">$leaveRequest</span>-&gt;getAllLeaveRequests();
+        }
+        <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>(<span class="php-variable">$result</span>);
+        <span class="php-keyword">break</span>;
+
+    <span class="php-keyword">case</span> <span class="php-echo">'POST'</span>:
+        <span class="php-variable">$data</span> = <span class="php-function">json_decode</span>(<span class="php-function">file_get_contents</span>(<span class="php-echo">'php://input'</span>), <span class="php-keyword">true</span>);
+        <span class="php-variable">$result</span> = <span class="php-variable">$leaveRequest</span>-&gt;createLeaveRequest(
+            <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_id'</span>],
+            <span class="php-variable">$data</span>[<span class="php-echo">'leave_type'</span>],
+            <span class="php-variable">$data</span>[<span class="php-echo">'start_date'</span>],
+            <span class="php-variable">$data</span>[<span class="php-echo">'end_date'</span>],
+            <span class="php-variable">$data</span>[<span class="php-echo">'reason'</span>]
+        );
+        <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'success'</span> => <span class="php-variable">$result</span>]);
+        <span class="php-keyword">break</span>;
+
+    <span class="php-keyword">case</span> <span class="php-echo">'PUT'</span>:
+        <span class="php-keyword">if</span>(<span class="php-variable">$auth</span>-&gt;hasRole(<span class="php-echo">'hr'</span>) || <span class="php-variable">$auth</span>-&gt;hasRole(<span class="php-echo">'admin'</span>)) {
+            <span class="php-variable">$data</span> = <span class="php-function">json_decode</span>(<span class="php-function">file_get_contents</span>(<span class="php-echo">'php://input'</span>), <span class="php-keyword">true</span>);
+            <span class="php-variable">$result</span> = <span class="php-variable">$leaveRequest</span>-&gt;updateLeaveRequestStatus(
+                <span class="php-variable">$data</span>[<span class="php-echo">'id'</span>],
+                <span class="php-variable">$data</span>[<span class="php-echo">'status'</span>],
+                <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_id'</span>]
+            );
+            <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'success'</span> => <span class="php-variable">$result</span>]);
+        } <span class="php-keyword">else</span> {
+            <span class="php-function">http_response_code</span>(<span class="php-number">403</span>);
+            <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'error'</span> => <span class="php-echo">'Forbidden'</span>]);
+        }
+        <span class="php-keyword">break</span>;
+
+    <span class="php-keyword">case</span> <span class="php-echo">'DELETE'</span>:
+        <span class="php-variable">$data</span> = <span class="php-function">json_decode</span>(<span class="php-function">file_get_contents</span>(<span class="php-echo">'php://input'</span>), <span class="php-keyword">true</span>);
+        <span class="php-variable">$result</span> = <span class="php-variable">$leaveRequest</span>-&gt;deleteLeaveRequest(<span class="php-variable">$data</span>[<span class="php-echo">'id'</span>], <span class="php-variable">$_SESSION</span>[<span class="php-echo">'user_id'</span>]);
+        <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'success'</span> => <span class="php-variable">$result</span>]);
+        <span class="php-keyword">break</span>;
+
+    <span class="php-keyword">default</span>:
+        <span class="php-function">http_response_code</span>(<span class="php-number">405</span>);
+        <span class="php-keyword">echo</span> <span class="php-function">json_encode</span>([<span class="php-echo">'error'</span> => <span class="php-echo">'Method not allowed'</span>]);
+        <span class="php-keyword">break</span>;
+}
+<span class="php-tag">?&gt;</span></code></pre>
+
+                <h3>models/LeaveRequest.php</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">require_once</span> <span class="php-echo">'../config/database.php'</span>;
+
+<span class="php-keyword">class</span> <span class="php-class">LeaveRequest</span> {
+    <span class="php-keyword">private</span> <span class="php-variable">$db</span>;
+    <span class="php-keyword">private</span> <span class="php-variable">$conn</span>;
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">__construct</span>() {
+        <span class="php-variable">$this</span>-&gt;db = <span class="php-keyword">new</span> Database();
+        <span class="php-variable">$this</span>-&gt;conn = <span class="php-variable">$this</span>-&gt;db-&gt;connect();
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">getAllLeaveRequests</span>() {
+        <span class="php-variable">$query</span> = <span class="php-echo">"SELECT lr.*, u.name as user_name FROM leave_requests lr 
+                 JOIN users u ON lr.user_id = u.id ORDER BY lr.created_at DESC"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;execute();
+        <span class="php-keyword">return</span> <span class="php-variable">$stmt</span>-&gt;fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">getLeaveRequest</span>(<span class="php-variable">$id</span>) {
+        <span class="php-variable">$query</span> = <span class="php-echo">"SELECT lr.*, u.name as user_name FROM leave_requests lr 
+                 JOIN users u ON lr.user_id = u.id WHERE lr.id = :id"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':id'</span>, <span class="php-variable">$id</span>);
+        <span class="php-variable">$stmt</span>-&gt;execute();
+        <span class="php-keyword">return</span> <span class="php-variable">$stmt</span>-&gt;fetch(PDO::FETCH_ASSOC);
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">createLeaveRequest</span>(<span class="php-variable">$user_id</span>, <span class="php-variable">$leave_type</span>, <span class="php-variable">$start_date</span>, <span class="php-variable">$end_date</span>, <span class="php-variable">$reason</span>) {
+        <span class="php-variable">$query</span> = <span class="php-echo">"INSERT INTO leave_requests (user_id, leave_type, start_date, end_date, reason) 
+                 VALUES (:user_id, :leave_type, :start_date, :end_date, :reason)"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':user_id'</span>, <span class="php-variable">$user_id</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':leave_type'</span>, <span class="php-variable">$leave_type</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':start_date'</span>, <span class="php-variable">$start_date</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':end_date'</span>, <span class="php-variable">$end_date</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':reason'</span>, <span class="php-variable">$reason</span>);
+        <span class="php-keyword">return</span> <span class="php-variable">$stmt</span>-&gt;execute();
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">updateLeaveRequestStatus</span>(<span class="php-variable">$id</span>, <span class="php-variable">$status</span>, <span class="php-variable">$approved_by</span>) {
+        <span class="php-variable">$query</span> = <span class="php-echo">"UPDATE leave_requests SET status = :status, approved_by = :approved_by 
+                 WHERE id = :id"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':status'</span>, <span class="php-variable">$status</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':approved_by'</span>, <span class="php-variable">$approved_by</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':id'</span>, <span class="php-variable">$id</span>);
+        <span class="php-keyword">return</span> <span class="php-variable">$stmt</span>-&gt;execute();
+    }
+
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">deleteLeaveRequest</span>(<span class="php-variable">$id</span>, <span class="php-variable">$user_id</span>) {
+        <span class="php-variable">$query</span> = <span class="php-echo">"DELETE FROM leave_requests WHERE id = :id AND user_id = :user_id"</span>;
+        <span class="php-variable">$stmt</span> = <span class="php-variable">$this</span>-&gt;conn-&gt;prepare(<span class="php-variable">$query</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':id'</span>, <span class="php-variable">$id</span>);
+        <span class="php-variable">$stmt</span>-&gt;bindParam(<span class="php-echo">':user_id'</span>, <span class="php-variable">$user_id</span>);
+        <span class="php-keyword">return</span> <span class="php-variable">$stmt</span>-&gt;execute();
+    }
+}
+<span class="php-tag">?&gt;</span></code></pre>
+
+                <div class="note">
+                    <p><strong>Note:</strong> This is a simplified implementation. In a production environment, you would need to add proper error handling, input validation, security measures, and more complex business logic.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Additional Features Implementation</h2>
+                
+                <h3>Email Notifications</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">require_once</span> <span class="php-echo">'../config/config.php'</span>;
+
+<span class="php-keyword">class</span> <span class="php-class">EmailService</span> {
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">sendLeaveApprovalEmail</span>(<span class="php-variable">$userEmail</span>, <span class="php-variable">$userName</span>, <span class="php-variable">$leaveDetails</span>) {
+        <span class="php-variable">$subject</span> = <span class="php-echo">"Your Leave Request Has Been "</span> . <span class="php-variable">$leaveDetails</span>[<span class="php-echo">'status'</span>];
+        <span class="php-variable">$message</span> = <span class="php-echo">"Dear $userName,\n\n"</span>;
+        <span class="php-variable">$message</span> .= <span class="php-echo">"Your leave request from "</span> . <span class="php-variable">$leaveDetails</span>[<span class="php-echo">'start_date'</span>] . <span class="php-echo">" to "</span> . <span class="php-variable">$leaveDetails</span>[<span class="php-echo">'end_date'</span>] . <span class="php-echo">" has been "</span> . <span class="php-variable">$leaveDetails</span>[<span class="php-echo">'status'</span>] . <span class="php-echo">".\n"</span>;
+        
+        <span class="php-keyword">if</span>(<span class="php-variable">$leaveDetails</span>[<span class="php-echo">'status'</span>] == <span class="php-echo">'approved'</span>) {
+            <span class="php-variable">$message</span> .= <span class="php-echo">"Enjoy your time off!\n"</span>;
+        } <span class="php-keyword">else</span> {
+            <span class="php-variable">$message</span> .= <span class="php-echo">"Please contact HR for more information.\n"</span>;
+        }
+        
+        <span class="php-variable">$message</span> .= <span class="php-echo">"\nBest regards,\nHR Department"</span>;
+        
+        <span class="php-variable">$headers</span> = <span class="php-echo">"From: "</span> . EMAIL_FROM . <span class="php-echo">"\r\n"</span>;
+        <span class="php-variable">$headers</span> .= <span class="php-echo">"Reply-To: "</span> . EMAIL_REPLY_TO . <span class="php-echo">"\r\n"</span>;
+        <span class="php-variable">$headers</span> .= <span class="php-echo">"X-Mailer: PHP/"</span> . <span class="php-function">phpversion</span>();
+        
+        <span class="php-keyword">return</span> <span class="php-function">mail</span>(<span class="php-variable">$userEmail</span>, <span class="php-variable">$subject</span>, <span class="php-variable">$message</span>, <span class="php-variable">$headers</span>);
+    }
+}
+<span class="php-tag">?&gt;</span></code></pre>
+
+                <h3>Zoom API Integration</h3>
+                <pre><code><span class="php-tag">&lt;?php</span>
+<span class="php-function">require_once</span> <span class="php-echo">'../config/config.php'</span>;
+
+<span class="php-keyword">class</span> <span class="php-class">ZoomService</span> {
+    <span class="php-keyword">private</span> <span class="php-variable">$apiKey</span>;
+    <span class="php-keyword">private</span> <span class="php-variable">$apiSecret</span>;
+    
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">__construct</span>() {
+        <span class="php-variable">$this</span>-&gt;apiKey = ZOOM_API_KEY;
+        <span class="php-variable">$this</span>-&gt;apiSecret = ZOOM_API_SECRET;
+    }
+    
+    <span class="php-keyword">public</span> <span class="php-function">function</span> <span class="php-function">createMeeting</span>(<span class="php-variable">$topic</span>, <span class="php-variable">$startTime</span>, <span class="php-variable">$duration</span>, <span class="php-variable">$timezone</span> = <span class="php-echo">'UTC'</span>) {
+        <span class="php-variable">$data</span> = [
+            <span class="php-echo">'topic'</span> => <span class="php-variable">$topic</span>,
+            <span class="php-echo">'type'</span> => <span class="php-number">2</span>, <span class="php-comment">// Scheduled meeting</span>
+            <span class="php-echo">'start_time'</span> => <span class="php-variable">$startTime</span>,
+            <span class="php-echo">'duration'</span> => <span class="php-variable">$duration</span>,
+            <span class="php-echo">'timezone'</span> => <span class="php-variable">$timezone</span>,
+            <span class="php-echo">'settings'</span> => [
+                <span class="php-echo">'host_video'</span> => <span class="php-keyword">true</span>,
+                <span class="php-echo">'participant_video'</span> => <span class="php-keyword">true</span>,
+                <span class="php-echo">'join_before_host'</span> => <span class="php-keyword">false</span>,
+                <span class="php-echo">'mute_upon_entry'</span> => <span class="php-keyword">false</span>,
+                <span class="php-echo">'watermark'</span> => <span class="php-keyword">false</span>,
+                <span class="php-echo">'use_pmi'</span> => <span class="php-keyword">false</span>
+            ]
+        ];
+        
+        <span class="php-variable">$url</span> = <span class="php-echo">"https://api.zoom.us/v2/users/me/meetings"</span>;
+        <span class="php-variable">$headers</span> = [
+            <span class="php-echo">'Authorization: Bearer '</span> . <span class="php-variable">$this</span>-&gt;generateJWT(),
+            <span class="php-echo">'Content-Type: application/json'</span>
+        ];
+        
+        <span class="php-variable">$ch</span> = <span class="php-function">curl_init</span>();
+        <span class="php-function">curl_setopt</span>(<span class="php-variable">$ch</span>, CURLOPT_URL, <span class="php-variable">$url</span>);
+        <span class="php-function">curl_setopt</span>(<span class="php-variable">$ch</span>, CURLOPT_POST, <span class="php-keyword">true</span>);
+        <span class="php-function">curl_setopt</span>(<span class="php-variable">$ch</span>, CURLOPT_HTTPHEADER, <span class="php-variable">$headers</span>);
+        <span class="php-function">curl_setopt</span>(<span class="php-variable">$ch</span>, CURLOPT_RETURNTRANSFER, <span class="php-keyword">true</span>);
+        <span class="php-function">curl_setopt</span>(<span class="php-variable">$ch</span>, CURLOPT_POSTFIELDS, <span class="php-function">json_encode</span>(<span class="php-variable">$data</span>));
+        
+        <span class="php-variable">$response</span> = <span class="php-function">curl_exec</span>(<span class="php-variable">$ch</span>);
+        <span class="php-function">curl_close</span>(<span class="php-variable">$ch</span>);
+        
+        <span class="php-keyword">return</span> <span class="php-function">json_decode</span>(<span class="php-variable">$response</span>, <span class="php-keyword">true</span>);
+    }
+    
+    <span class="php-keyword">private</span> <span class="php-function">function</span> <span class="php-function">generateJWT</span>() {
+        <span class="php-variable">$payload</span> = [
+            <span class="php-echo">'iss'</span> => <span class="php-variable">$this</span>-&gt;apiKey,
+            <span class="php-echo">'exp'</span> => <span class="php-function">time</span>() + <span class="php-number">60</span>
+        ];
+        
+        <span class="php-keyword">return</span> JWT::encode(<span class="php-variable">$payload</span>, <span class="php-variable">$this</span>-&gt;apiSecret);
+    }
+}
+<span class="php-tag">?&gt;</span></code></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
